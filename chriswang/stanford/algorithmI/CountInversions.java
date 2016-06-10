@@ -82,8 +82,7 @@ public class CountInversions {
     }
 
     public static void main(String[] args) throws IOException{
-        InputStream in = new FileInputStream(new File("D:/Programming/Coursera-Algorithms-" +
-              "I/IntegerArray.txt"));
+        InputStream in = new FileInputStream(new File("./src/com/IntegerArray.txt"));
         BufferedReader reader = new BufferedReader(new InputStreamReader(in));
         int intNum = 100000;
         int i = 0;
