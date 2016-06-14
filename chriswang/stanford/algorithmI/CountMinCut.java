@@ -1,5 +1,16 @@
 package com.chriswang.stanford.algorithmI;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Random;
+
 /**
  The file contains the adjacency list representation of a simple undirected graph. There are 200
  vertices labeled 1 to 200. The first column in the file represents the vertex label, and the
@@ -20,4 +31,72 @@ package com.chriswang.stanford.algorithmI;
 
 public class CountMinCut {
 
+    public static int contract (HashMap<Integer, ArrayList<Integer>> graph) {
+
+        if (graph.size() == 1 || graph.size() == 0) {
+            return 0;
+        }
+
+        ArrayList<Integer> vertexArrayList = new ArrayList<>();
+        for (int i = 0; i < graph.size(); i++) {
+            vertexArrayList.add(i + 1);
+        }
+
+        while (graph.size() >= 3) {
+
+            Integer ind1 = vertexArrayList.get(new Random().nextInt(vertexArrayList.size()));
+            vertexArrayList.remove(ind1);
+            ArrayList<Integer> vertex1 = graph.get(ind1);
+            graph.remove(ind1);
+
+            Integer ind2 = vertexArrayList.get(new Random().nextInt(vertexArrayList.size()));
+            ArrayList<Integer> vertex2 = graph.get(ind2);
+            Iterator<Integer> iterator = vertex2.iterator();
+            while (iterator.hasNext()) {
+                if (iterator.next().equals(ind1)) {
+                    iterator.remove();
+                }
+            }
+
+            for (int i = 0; i < vertex1.size(); i++) {
+                Integer num = vertex1.get(i);
+                if (num.equals(ind2)) {
+                    continue;
+                }
+
+                ArrayList<Integer> neighbour = graph.get(num);
+                for (int j = 0; j < neighbour.size(); j++) {
+                    if (neighbour.get(j).equals(ind1)) {
+                        neighbour.set(j, ind2);
+                    }
+                }
+                vertex2.add(num);
+            }
+        }
+        return graph.get(vertexArrayList.get(0)).size();
+    }
+
+
+    public static void main(String[] args) throws IOException {
+        InputStream in = new FileInputStream(new File("./src/com/kargerMinCut.txt"));
+        BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+        HashMap<Integer, ArrayList<Integer>> graph = new HashMap<>();
+        for (int i = 0; i < 200; i++) {
+            String[] line = reader.readLine().split("\\s+");
+            ArrayList<Integer> vertex = new ArrayList<>();
+            for (int j = 1; j < line.length; j++) {
+                vertex.add(Integer.parseInt(line[j]));
+            }
+            graph.put(i + 1, vertex);
+        }
+
+        int min = Integer.MAX_VALUE;
+        for (int i = 0; i < 100; i++) {
+            HashMap<Integer, ArrayList<Integer>> newGraph = new HashMap<>(graph);
+            int curMin = contract(newGraph);
+            System.out.println(curMin);
+            min = Math.min(min, curMin);
+        }
+        System.out.println(min);
+    }
 }
