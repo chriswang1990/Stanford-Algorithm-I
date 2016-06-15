@@ -29,25 +29,34 @@ import java.util.Random;
  provided. So e.g., if your answer is 5, just type 5 in the space provided.
  */
 
+
+/*  *****NOTES*******
+When you want to deep copy a ArrayList with mutable Objects, remember to iterate and deep copy
+all the objects. With only constructor (new ArrayList<>(oldList)) is not enough !!!!!
+*/
 public class CountMinCut {
 
     public static int contract (ArrayList<int[]> edges) {
 
+        //create a HashSet for the vertex
         HashSet<Integer> vertex = new HashSet<>();
         for (Integer i = 1; i < 201; i++) {
             vertex.add(i);
         }
 
+        //loop until only two vertex left
         while (vertex.size() >= 3) {
 
+            //randomly select a edge from the edges ArrayList
             int random = new Random().nextInt(edges.size());
             int[] edge = edges.get(random);
-
             Integer ind1 = edge[0];
             Integer ind2 = edge[1];
 
+            //remove ind1 in the vertex ArrayList
             vertex.remove(ind1);
 
+            //redirect all the edges from or to ind1 as ind2
             for (int[] i : edges) {
                 if (i[1] == ind1) {
                     i[1] = ind2;
@@ -57,6 +66,7 @@ public class CountMinCut {
                 }
             }
 
+            //Iterate the edges to remove all self direct edges
             Iterator<int[]> iterator = edges.iterator();
             while (iterator.hasNext()) {
                 int[] curEdge = iterator.next();
@@ -65,33 +75,40 @@ public class CountMinCut {
                 }
             }
         }
-
-        return edges.size();
+        //the edge information in edges ArrayList is double size of the actually edges
+        return edges.size() / 2;
     }
 
 
     public static void main(String[] args) throws IOException {
+
+        //read from the text file
         InputStream in = new FileInputStream(new File("./src/com/kargerMinCut.txt"));
         BufferedReader reader = new BufferedReader(new InputStreamReader(in));
         ArrayList<int[]> edges = new ArrayList<>();
-        for (int i = 0; i < 200; i++) {
+        //from 1 to 200, vertex index
+        for (int i = 1; i < 201; i++) {
+            //split string with any white space
             String[] line = reader.readLine().split("\\s+");
             for (int j = 1; j < line.length; j++) {
                 int[] edge = new int[2];
                 int neighbour = Integer.parseInt(line[j]);
-                edge[0] = i + 1;
+                edge[0] = i;
                 edge[1] = neighbour;
                 edges.add(edge);
             }
         }
 
+        //initiate min with a impossible result
         int min = Integer.MAX_VALUE;
+        //run the contraction 100 times for the best result
         for (int i = 0; i < 100; i++) {
+            //deep copy the original ArrayList for the random selection contraction algorithm
             ArrayList<int[]> newEdges = new ArrayList<>();
             for (int[] j : edges) {
                 newEdges.add(new int[] {j[0], j[1]});
             }
-            int curMin = contract(newEdges) / 2;
+            int curMin = contract(newEdges);
             min = Math.min(min, curMin);
         }
         System.out.println("final min: " + min);
