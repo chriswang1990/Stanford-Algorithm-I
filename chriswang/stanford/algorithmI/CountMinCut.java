@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Random;
 
@@ -31,72 +31,69 @@ import java.util.Random;
 
 public class CountMinCut {
 
-    public static int contract (HashMap<Integer, ArrayList<Integer>> graph) {
+    public static int contract (ArrayList<int[]> edges) {
 
-        if (graph.size() == 1 || graph.size() == 0) {
-            return 0;
+        HashSet<Integer> vertex = new HashSet<>();
+        for (Integer i = 1; i < 201; i++) {
+            vertex.add(i);
         }
 
-        ArrayList<Integer> vertexArrayList = new ArrayList<>();
-        for (int i = 0; i < graph.size(); i++) {
-            vertexArrayList.add(i + 1);
-        }
+        while (vertex.size() >= 3) {
 
-        while (graph.size() >= 3) {
+            int random = new Random().nextInt(edges.size());
+            int[] edge = edges.get(random);
 
-            Integer ind1 = vertexArrayList.get(new Random().nextInt(vertexArrayList.size()));
-            vertexArrayList.remove(ind1);
-            ArrayList<Integer> vertex1 = graph.get(ind1);
-            graph.remove(ind1);
+            Integer ind1 = edge[0];
+            Integer ind2 = edge[1];
 
-            Integer ind2 = vertexArrayList.get(new Random().nextInt(vertexArrayList.size()));
-            ArrayList<Integer> vertex2 = graph.get(ind2);
-            Iterator<Integer> iterator = vertex2.iterator();
+            vertex.remove(ind1);
+
+            for (int[] i : edges) {
+                if (i[1] == ind1) {
+                    i[1] = ind2;
+                }
+                if (i[0] == ind1) {
+                    i[0] = ind2;
+                }
+            }
+
+            Iterator<int[]> iterator = edges.iterator();
             while (iterator.hasNext()) {
-                if (iterator.next().equals(ind1)) {
+                int[] curEdge = iterator.next();
+                if (curEdge[0] == curEdge[1]) {
                     iterator.remove();
                 }
             }
-
-            for (int i = 0; i < vertex1.size(); i++) {
-                Integer num = vertex1.get(i);
-                if (num.equals(ind2)) {
-                    continue;
-                }
-
-                ArrayList<Integer> neighbour = graph.get(num);
-                for (int j = 0; j < neighbour.size(); j++) {
-                    if (neighbour.get(j).equals(ind1)) {
-                        neighbour.set(j, ind2);
-                    }
-                }
-                vertex2.add(num);
-            }
         }
-        return graph.get(vertexArrayList.get(0)).size();
+
+        return edges.size();
     }
 
 
     public static void main(String[] args) throws IOException {
         InputStream in = new FileInputStream(new File("./src/com/kargerMinCut.txt"));
         BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-        HashMap<Integer, ArrayList<Integer>> graph = new HashMap<>();
+        ArrayList<int[]> edges = new ArrayList<>();
         for (int i = 0; i < 200; i++) {
             String[] line = reader.readLine().split("\\s+");
-            ArrayList<Integer> vertex = new ArrayList<>();
             for (int j = 1; j < line.length; j++) {
-                vertex.add(Integer.parseInt(line[j]));
+                int[] edge = new int[2];
+                int neighbour = Integer.parseInt(line[j]);
+                edge[0] = i + 1;
+                edge[1] = neighbour;
+                edges.add(edge);
             }
-            graph.put(i + 1, vertex);
         }
 
         int min = Integer.MAX_VALUE;
         for (int i = 0; i < 100; i++) {
-            HashMap<Integer, ArrayList<Integer>> newGraph = new HashMap<>(graph);
-            int curMin = contract(newGraph);
-            System.out.println(curMin);
+            ArrayList<int[]> newEdges = new ArrayList<>();
+            for (int[] j : edges) {
+                newEdges.add(new int[] {j[0], j[1]});
+            }
+            int curMin = contract(newEdges) / 2;
             min = Math.min(min, curMin);
         }
-        System.out.println(min);
+        System.out.println("final min: " + min);
     }
 }
