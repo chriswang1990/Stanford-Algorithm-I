@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Stack;
 
 /**
  * The file contains the edges of a directed graph. Vertices are labeled as positive integers from 1
@@ -51,27 +52,24 @@ public class SCC {
                 continue;
             }
             isVisited.put(i, true);
-            fTime = countFTime(reversed, i, fTimeMap, fTime, isVisited);
+            Stack<Integer> stack = new Stack<>();
+            stack.push(i);
+
+            while (!stack.isEmpty()) {
+                Integer vertex = stack.pop();
+                isVisited.put(vertex, true);
+                for (Integer neighbour : reversed.get(vertex)) {
+                    if (isVisited.get(neighbour)) {
+                        continue;
+                    }
+                    stack.push(neighbour);
+                }
+                fTimeMap.put(fTime, vertex);
+                fTime++;
+            }
         }
 
         return componentsArray;
-    }
-
-    private static Integer countFTime(HashMap<Integer, ArrayList<Integer>> reversed, Integer
-          vertex,
-                                      HashMap<Integer,
-                                            Integer> fTimeMap, Integer fTime, HashMap<Integer,
-          Boolean> isVisited) {
-        isVisited.put(vertex, true);
-        if (reversed.get(vertex) != null) {
-            for (Integer neighbour : reversed.get(vertex)) {
-                if (!isVisited.get(neighbour)) {
-                    fTime = countFTime(reversed, neighbour, fTimeMap, fTime, isVisited);
-                }
-            }
-        }
-        fTimeMap.put(fTime, vertex);
-        return fTime + 1;
     }
 
     public static void main(String[] args) throws IOException {
