@@ -52,15 +52,18 @@ in the first and second parts of this programming assignment, be sure to impleme
 
 public class ComputeComparisons {
     private static int QuickSort(int[] array, int start, int end) {
-        if (end == start) {
+        
+        //base case handling
+        if (start >= end) {
             return 0;
         }
 
+        //find the pivot(start, end or median of three)
         int pivot;
-        int[] pivotArray = new int[3];
         if (end - start == 1) {
             pivot = array[start];
         } else {
+            int[] pivotArray = new int[3];
             pivotArray[0] = array[start];
             pivotArray[2] = array[end];
             pivotArray[1] = array[start + (end - start) / 2];
@@ -73,27 +76,19 @@ public class ComputeComparisons {
             }
         }
 
-        int j = start;
+        //quick sort with the pivot
+        int j = start + 1;
         for (int i = start + 1; i <= end; i++) {
             if (array[i] > pivot) {
                 continue;
-            } else {
-                if (j == i - 1) {
-                    j++;
-                } else {
-                    swap(array, j + 1, i);
-                    j++;
-                }
             }
+            swap(array, j, i);
+            j++;
         }
-        swap(array, start, j);
-        if (j == start) {
-            return QuickSort(array, j + 1, end) + end - start;
-        } else if (j == end) {
-            return QuickSort(array, start, j - 1) + end - start;
-        } else {
-            return QuickSort(array, start, j - 1) + QuickSort(array, j + 1, end) + end - start;
-        }
+        swap(array, start, j - 1);
+
+        //recursion call;
+        return QuickSort(array, start, j - 2) + QuickSort(array, j, end) + end - start;
     }
 
     private static void swap(int[] array, int a, int b) {
