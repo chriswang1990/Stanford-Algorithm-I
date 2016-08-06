@@ -7,7 +7,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.PriorityQueue;
+import java.util.Stack;
+
+//Need to use Xss10m for the stack size
 
 /**
  * The file contains the edges of a directed graph. Vertices are labeled as positive integers from 1
@@ -34,56 +39,79 @@ import java.util.HashMap;
  */
 
 public class SCCRe {
-
-    public static ArrayList<Integer> countSCC(HashMap<Integer, ArrayList<Integer>> graph,
-                                              HashMap<Integer, ArrayList<Integer>> reversed) {
-        ArrayList<Integer> componentsArray = new ArrayList<>();
-        HashMap<Integer, Boolean> isVisited = new HashMap<>();
-        HashMap<Integer, Integer> fTimeMap = new HashMap<>();
-        Integer fTime = 1;
-
-        for (Integer i = 1; i < graph.size() + 1; i++) {
-            isVisited.put(i, false);
+    public static class Node {
+        boolean visited = false;
+        ArrayList<Integer> neighbours = new ArrayList<>();
+        int label = -1;
+        Node (int i) {
+            label = i;
         }
-
-        for (Integer i = 1; i < reversed.size() + 1; i++) {
-            if (isVisited.get(i)) {
-                continue;
-            }
-            isVisited.put(i, true);
-            fTime = countFTime(reversed, i, fTimeMap, fTime, isVisited);
-        }
-
-        return componentsArray;
     }
 
-    private static Integer countFTime(HashMap<Integer, ArrayList<Integer>> reversed, Integer
-          vertex,
-                                      HashMap<Integer,
-                                            Integer> fTimeMap, Integer fTime, HashMap<Integer,
-          Boolean> isVisited) {
-        isVisited.put(vertex, true);
-        if (reversed.get(vertex) != null) {
-            for (Integer neighbour : reversed.get(vertex)) {
-                if (!isVisited.get(neighbour)) {
-                    fTime = countFTime(reversed, neighbour, fTimeMap, fTime, isVisited);
-                }
+    public static void countSCC(HashMap<Integer, Node> graph,
+                                              HashMap<Integer, Node> graphRev) {
+        Stack<Node> order = new Stack<>();
+        PriorityQueue<Integer> pq = new PriorityQueue<>(5, new Comparator<Integer>() {
+            @Override
+            public int compare(Integer o1, Integer o2) {
+                return o2 - o1;
+            }
+        });
+
+        for (Integer i = 1; i < graphRev.size() + 1; i++) {
+            Node node = graphRev.get(i);
+            if (node.visited) {
+                continue;
+            }
+            countFTime(graph, graphRev, node.label, order);
+        }
+        while (!order.empty()) {
+            Node cur = order.pop();
+            if (!cur.visited) {
+                int size = 0;
+                size = dfs(cur, size, graph);
+                pq.offer(size);
             }
         }
-        fTimeMap.put(fTime, vertex);
-        return fTime + 1;
+        for (int i = 0; i < 5; i++) {
+            System.out.println(pq.poll());
+        }
+    }
+
+    private static int dfs(Node node, int size, HashMap<Integer, Node> graph){
+        node.visited = true;
+        size++;
+        for (Integer i : node.neighbours) {
+            Node neighbour = graph.get(i);
+            if (!neighbour.visited) {
+                size = dfs(neighbour, size, graph);
+            }
+        }
+        return size;
+    }
+
+    private static void countFTime(HashMap<Integer, Node> graph, HashMap<Integer,Node> graphRev,
+                                   Integer nodeLabel, Stack<Node> order) {
+        Node node = graphRev.get(nodeLabel);
+        node.visited = true;
+        for (Integer neighbour : node.neighbours) {
+            Node neighbourNode = graphRev.get(neighbour);
+            if (!neighbourNode.visited) {
+                countFTime(graph, graphRev, neighbourNode.label, order);
+            }
+        }
+        order.push(graph.get(node.label));
     }
 
     public static void main(String[] args) throws IOException {
-
-        InputStream in = new FileInputStream(new File("./src/com/SCC.txt"));
+        InputStream in = new FileInputStream(new File("SCC.txt"));
         BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-        HashMap<Integer, ArrayList<Integer>> graph = new HashMap<>();
-        HashMap<Integer, ArrayList<Integer>> reversed = new HashMap<>();
+        HashMap<Integer, Node> graph = new HashMap<>();
+        HashMap<Integer, Node> graphRev = new HashMap<>();
 
         for (Integer i = 1; i < 875715; i++) {
-            graph.put(i, new ArrayList<>());
-            reversed.put(i, new ArrayList<>());
+            graph.put(i, new Node(i));
+            graphRev.put(i, new Node(i));
         }
 
         while (true) {
@@ -93,11 +121,9 @@ public class SCCRe {
             }
             Integer tail = Integer.valueOf(line.split(" ")[0]);
             Integer head = Integer.valueOf(line.split(" ")[1]);
-
-            graph.get(tail).add(head);
-            reversed.get(head).add(tail);
+            graph.get(tail).neighbours.add(head);
+            graphRev.get(head).neighbours.add(tail);
         }
-
-        countSCC(graph, reversed);
+        countSCC(graph, graphRev);
     }
 }

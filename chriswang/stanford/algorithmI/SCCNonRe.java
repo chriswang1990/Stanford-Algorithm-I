@@ -10,6 +10,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Stack;
 
+//not completed. need structure to record when the dfs is finished in stack to determine the
+// finish time
+
 /**
  * The file contains the edges of a directed graph. Vertices are labeled as positive integers from 1
  * to 875714. Every row indicates an edge, the vertex label in first column is the tail and the
