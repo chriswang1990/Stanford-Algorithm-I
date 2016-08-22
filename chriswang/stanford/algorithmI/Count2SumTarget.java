@@ -8,6 +8,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashSet;
 
+/*
+Naive implementation, took more than an hour to get the answer...
+ */
+
 /**
  * The goal of this problem is to implement a variant of the 2-SUM algorithm (covered in the Week 6
  * lecture on hash table applications).
@@ -28,20 +32,21 @@ import java.util.HashSet;
 public class Count2SumTarget {
 
     public static int countTarget(long[] input) {
-
-
+        int ans = 0;
         for (int t = -10000; t < 10001; t++) {
             HashSet<Long>set = new HashSet<>();
+            System.out.println(t);
             for (long l : input) {
                 set.add(t - l);
             }
             for (long l : input) {
                 if (set.contains(l)) {
-                    return t + 10000;
+                    ans++;
+                    break;
                 }
             }
         }
-        return -1;
+        return ans;
     }
 
     public static void main(String[] args) throws IOException {
