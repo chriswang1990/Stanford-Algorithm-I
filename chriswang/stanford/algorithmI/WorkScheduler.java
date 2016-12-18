@@ -1,5 +1,9 @@
 package com.chriswang.stanford.algorithmI;
 
+import java.io.*;
+import java.util.Comparator;
+import java.util.PriorityQueue;
+
 /**
  In this programming problem and the next you'll code up the greedy algorithms from lecture for minimizing the weighted
  sum of completion times..
@@ -31,4 +35,68 @@ package com.chriswang.stanford.algorithmI;
  to the discussion forum).
  */
 public class WorkScheduler {
+
+    private static class Job {
+        int weight;
+        int length;
+        int diff;
+        float quot;
+        private Job(int weight, int length) {
+            this.weight = weight;
+            this.length = length;
+            this.diff = weight - length;
+            this.quot = weight / (float) length;
+        }
+    }
+
+    public static void main(String[] args) throws IOException {
+        PriorityQueue<Job> queue1 = new PriorityQueue<>(new Comparator<Job>() {
+            @Override
+            public int compare(Job o1, Job o2) {
+                if (o1.diff != o2.diff) {
+                    return o2.diff - o1.diff;
+                } else {
+                    return o2.weight - o1.weight;
+                }
+            }
+        });
+        PriorityQueue<Job> queue2 = new PriorityQueue<>(new Comparator<Job>() {
+            @Override
+            public int compare(Job o1, Job o2) {
+                if (o2.quot > o1.quot) {
+                    return 1;
+                } else if (o2.quot == o1.quot) {
+                    return 0;
+                } else {
+                    return -1;
+                }
+            }
+        });
+        InputStream in = new FileInputStream(new File("JavaPractice/src/com/jobs.txt"));
+        BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+        int size = Integer.valueOf(reader.readLine());
+        for (int i = 0; i < size; i++) {
+            String[] tuple = reader.readLine().split(" ");
+            queue1.offer(new Job(Integer.valueOf(tuple[0]), Integer.valueOf(tuple[1])));
+            queue2.offer(new Job(Integer.valueOf(tuple[0]), Integer.valueOf(tuple[1])));
+        }
+        long sum1 = 0;
+        int time1 = 0;
+        long sum2 = 0;
+        int time2 = 0;
+        while (!queue1.isEmpty()) {
+            Job cur = queue1.poll();
+            time1 += cur.length;
+            sum1 += time1 * cur.weight;
+        }
+        while (!queue2.isEmpty()) {
+            Job cur = queue2.poll();
+            time2 += cur.length;
+            sum2 += time2 * cur.weight;
+        }
+        System.out.println("sum1: " + sum1);
+        System.out.println("sum2: " + sum2);
+    }
 }
+
+
